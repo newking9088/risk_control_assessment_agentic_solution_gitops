@@ -1,0 +1,9 @@
+# Populated by CI/CD workflows via --set flags.
+# See .github/workflows/ci-cd-*.yaml for per-environment values.
+appName: "risk-control-assessment-agentic-solution"
+org: "newking9088"
+repo: "risk_control_assessment_agentic_solution_gitops"
+env: ""
+server: ""
+IngressFrontendHost: ""
+IngressBackendHost: ""

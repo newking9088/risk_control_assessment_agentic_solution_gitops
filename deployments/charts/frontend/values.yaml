@@ -1,0 +1,63 @@
+# Default values — overridden by deployments/values/frontend/<env>/ui/values.yaml
+replicaCount: 1
+enabled: false
+
+image:
+  repository: "CHANGE_ME_REGISTRY_URL/ui"
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets:
+  - name: "CHANGE_ME_PULL_SECRET_NAME"
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  automount: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  domain: "localhost"
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/cors-allow-credentials: 'true'
+    nginx.ingress.kubernetes.io/cors-allow-methods: "*"
+    nginx.ingress.kubernetes.io/cors-allow-origins: "*"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "*"
+    nginx.ingress.kubernetes.io/enable-cors: 'true'
+  paths:
+    - path: /
+      pathType: Prefix
+  tls: []
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+keyvault:
+  name: ""
+secrets: []
+env: {}
+
+volumes: []
+volumeMounts: []
+nodeSelector: {}
+tolerations: []
+affinity: {}

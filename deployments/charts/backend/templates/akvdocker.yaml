@@ -1,0 +1,19 @@
+{{- if and .Values.dockerKeyvault .Values.dockerKeyvault.name }}
+apiVersion: spv.no/v2beta1
+kind: AzureKeyVaultSecret
+metadata:
+  name: {{ include "backend.fullname" . }}-docker-pull-secret
+  labels:
+    {{- include "backend.labels" . | nindent 4 }}
+spec:
+  vault:
+    name: {{ .Values.dockerKeyvault.name }}
+  object:
+    name: {{ .Values.dockerKeyvault.secretName | default "docker-registry-secret" }}
+    type: secret
+  output:
+    secret:
+      type: kubernetes.io/dockerconfigjson
+      name: {{ .Values.dockerKeyvault.pullSecretName | default "registry-pull-secret" }}
+      dataKey: .dockerconfigjson
+{{- end }}

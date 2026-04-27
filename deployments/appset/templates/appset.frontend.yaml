@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: frontend-appset-{{ .Values.appName }}-{{ .Values.env }}
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: 'https://github.com/{{ .Values.org }}/{{ .Values.repo }}.git'
+        revision: HEAD
+        directories:
+          - path: deployments/values/frontend/{{ .Values.env }}/*
+  template:
+    metadata:
+      namespace: argocd
+      name: '{{ .Values.appName }}-{{ .Values.env }}-{{`{{path.basename}}`}}'
+    spec:
+      project: '{{ .Values.env }}-{{ .Values.appName }}'
+      source:
+        repoURL: 'https://github.com/{{ .Values.org }}/{{ .Values.repo }}.git'
+        targetRevision: HEAD
+        path: deployments/charts/frontend
+        helm:
+          valueFiles:
+            - '../../values/{{`{{path[2]}}`}}/{{`{{path[3]}}`}}/{{`{{path.basename}}`}}/values.yaml'
+          values: |
+            ingress:
+              domain: {{ .Values.IngressFrontendHost }}
+      destination:
+        namespace: {{ .Values.env }}
+        server: {{ .Values.server }}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
