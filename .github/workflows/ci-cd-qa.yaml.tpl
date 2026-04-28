@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
 
 env:
-  APP_NAME: "risk-control-assessment-agentic-solution"
+  APP_NAME: "${APP_NAME}"
   ENV: "qa"
   DOMAIN_SUFFIX: ${{ vars.DOMAIN_SUFFIX }}
   CLUSTER_SERVER: ${{ vars.CLUSTER_SERVER }}
-  GITHUB_ORG: "newking9088"
-  GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
+  GITHUB_ORG: "${GITHUB_ORG}"
+  GITHUB_REPO: "${GITHUB_REPO}"
 
 jobs:
   deploy-qa:

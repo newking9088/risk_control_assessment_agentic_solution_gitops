@@ -15,7 +15,7 @@ scripts/
 deployments/
   appset/                            ← ArgoCD ApplicationSets (one per environment)
     Chart.yaml
-    values.yaml
+    values.yaml.tpl                  ← Template; apply-config.sh generates values.yaml
     templates/
       project.yaml                   ← ArgoCD AppProject per env
       appset.backend.yaml            ← ApplicationSet for API + Auth services
@@ -30,10 +30,10 @@ deployments/
     frontend/{dev,qa,stage,prod}/
       ui/values.yaml.tpl             ← Frontend values per env
 .github/workflows/
-  ci-cd-dev.yaml                     ← Auto-deploy on PR merge to main
-  ci-cd-qa.yaml                      ← Manual dispatch
-  ci-cd-stage.yaml                   ← Manual dispatch
-  ci-cd-prod.yaml                    ← Manual dispatch + approval gate
+  ci-cd-dev.yaml.tpl                 ← Template; generated ci-cd-dev.yaml auto-deploys on PR merge to main
+  ci-cd-qa.yaml.tpl                  ← Template; generated ci-cd-qa.yaml is manual dispatch
+  ci-cd-stage.yaml.tpl               ← Template; generated ci-cd-stage.yaml is manual dispatch
+  ci-cd-prod.yaml.tpl                ← Template; generated ci-cd-prod.yaml is manual dispatch + approval gate
 ```
 
 ---
@@ -83,7 +83,8 @@ This reads `config.yaml` and produces a `values.yaml` alongside each `.tpl` file
 ### Step 3 — Commit the generated files
 
 ```bash
-git add deployments/values/**/*.yaml
+git add deployments/values/ deployments/appset/values.yaml .github/workflows/ci-cd-*.yaml
+# or: find . -name '*.yaml' -not -name '*.tpl' | xargs git add
 git commit -m "chore: populate environment values from config"
 git push
 ```

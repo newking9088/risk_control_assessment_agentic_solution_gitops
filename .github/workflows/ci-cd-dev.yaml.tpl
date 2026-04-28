@@ -1,20 +1,24 @@
-name: Deploy — stage
+name: Deploy — dev
 
 on:
+  pull_request:
+    types: [closed]
+    branches: [main]
   workflow_dispatch:
 
 env:
-  APP_NAME: "risk-control-assessment-agentic-solution"
-  ENV: "stage"
+  APP_NAME: "${APP_NAME}"
+  ENV: "dev"
   DOMAIN_SUFFIX: ${{ vars.DOMAIN_SUFFIX }}
   CLUSTER_SERVER: ${{ vars.CLUSTER_SERVER }}
-  GITHUB_ORG: "newking9088"
-  GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
+  GITHUB_ORG: "${GITHUB_ORG}"
+  GITHUB_REPO: "${GITHUB_REPO}"
 
 jobs:
-  deploy-stage:
+  deploy-dev:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    environment: stage
+    environment: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +32,7 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy AppSet — stage
+      - name: Deploy AppSet — dev
         run: |
           INGRESS_HOST="${APP_NAME}-${ENV}.${DOMAIN_SUFFIX}"
           helm upgrade --install \

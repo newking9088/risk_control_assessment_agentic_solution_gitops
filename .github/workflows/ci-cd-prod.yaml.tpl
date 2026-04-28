@@ -1,24 +1,20 @@
-name: Deploy — dev
+name: Deploy — prod
 
 on:
-  pull_request:
-    types: [closed]
-    branches: [main]
   workflow_dispatch:
 
 env:
-  APP_NAME: "risk-control-assessment-agentic-solution"
-  ENV: "dev"
+  APP_NAME: "${APP_NAME}"
+  ENV: "prod"
   DOMAIN_SUFFIX: ${{ vars.DOMAIN_SUFFIX }}
   CLUSTER_SERVER: ${{ vars.CLUSTER_SERVER }}
-  GITHUB_ORG: "newking9088"
-  GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
+  GITHUB_ORG: "${GITHUB_ORG}"
+  GITHUB_REPO: "${GITHUB_REPO}"
 
 jobs:
-  deploy-dev:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+  deploy-prod:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: prod   # requires manual approval gate in GitHub Environments settings
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,9 +28,10 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy AppSet — dev
+      - name: Deploy AppSet — prod
         run: |
-          INGRESS_HOST="${APP_NAME}-${ENV}.${DOMAIN_SUFFIX}"
+          # prod domain has no -prod suffix
+          INGRESS_HOST="${APP_NAME}.${DOMAIN_SUFFIX}"
           helm upgrade --install \
             appset-${APP_NAME}-${ENV} \
             deployments/appset \
@@ -47,4 +44,4 @@ jobs:
             --set server="${CLUSTER_SERVER}" \
             --set IngressFrontendHost="${INGRESS_HOST}" \
             --set IngressBackendHost="${INGRESS_HOST}" \
-            --wait --timeout 5m
+            --wait --timeout 10m

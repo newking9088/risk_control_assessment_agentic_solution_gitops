@@ -1,14 +1,12 @@
-{{- range .Values.envs }}
-{{- $env := . }}
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: {{ $env }}-{{ $.Values.appName }}
+  name: {{ .Values.env }}-{{ .Values.appName }}
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: "RCA Platform project — {{ $env }}"
+  description: "RCA Platform project – {{ .Values.env }}"
   sourceRepos:
     - '*'
   destinations:
@@ -17,5 +15,3 @@ spec:
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'
----
-{{- end }}

@@ -3,7 +3,7 @@
 # =============================================================================
 # Fill in all CHANGE_ME values before running scripts/apply-config.sh
 # Values already populated are fixed for this project.
-# Secrets (Key Vault names, registry credentials) should also be set in .env
+# Secrets remain in Azure Key Vault; nothing is read from .env
 # =============================================================================
 
 # --- App identity (fixed) ---

@@ -1,20 +1,20 @@
-name: Deploy — prod
+name: Deploy — stage
 
 on:
   workflow_dispatch:
 
 env:
-  APP_NAME: "risk-control-assessment-agentic-solution"
-  ENV: "prod"
+  APP_NAME: "${APP_NAME}"
+  ENV: "stage"
   DOMAIN_SUFFIX: ${{ vars.DOMAIN_SUFFIX }}
   CLUSTER_SERVER: ${{ vars.CLUSTER_SERVER }}
-  GITHUB_ORG: "newking9088"
-  GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
+  GITHUB_ORG: "${GITHUB_ORG}"
+  GITHUB_REPO: "${GITHUB_REPO}"
 
 jobs:
-  deploy-prod:
+  deploy-stage:
     runs-on: ubuntu-latest
-    environment: prod   # requires manual approval gate in GitHub Environments settings
+    environment: stage
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,10 +28,9 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy AppSet — prod
+      - name: Deploy AppSet — stage
         run: |
-          # prod domain has no -prod suffix
-          INGRESS_HOST="${APP_NAME}.${DOMAIN_SUFFIX}"
+          INGRESS_HOST="${APP_NAME}-${ENV}.${DOMAIN_SUFFIX}"
           helm upgrade --install \
             appset-${APP_NAME}-${ENV} \
             deployments/appset \
@@ -44,4 +43,4 @@ jobs:
             --set server="${CLUSTER_SERVER}" \
             --set IngressFrontendHost="${INGRESS_HOST}" \
             --set IngressBackendHost="${INGRESS_HOST}" \
-            --wait --timeout 10m
+            --wait --timeout 5m
