@@ -103,4 +103,21 @@ for env in dev qa stage prod; do
     "$D/values/frontend/${env}/ui/values.yaml.tpl"
 done
 
+# Dead-config-key guard: every key in config.yaml must be referenced by at least one .tpl file
+echo ""
+echo "--- Dead config key guard ---"
+while IFS= read -r line; do
+  [[ "$line" =~ ^[[:space:]]*# ]] && continue
+  [[ -z "${line// }" ]] && continue
+  [[ "$line" != *:* ]] && continue
+  key=$(echo "$line" | cut -d':' -f1 | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//')
+  [[ -z "$key" ]] && continue
+  count=$(grep -r "\${${key}}" \
+    "$D" "$REPO_ROOT/.github/workflows" \
+    --include="*.tpl" 2>/dev/null | wc -l | tr -d '[:space:]')
+  [[ "${count:-0}" -gt 0 ]] \
+    && _pass "config key ${key} referenced in at least one .tpl" \
+    || _fail "config key ${key} is dead — not referenced by any .tpl" ">=1 match" "0"
+done < "$REPO_ROOT/config.yaml"
+
 report

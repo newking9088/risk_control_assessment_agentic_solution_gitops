@@ -58,7 +58,7 @@ assert_contains \
   "$OUTPUT"
 
 # No empty documents (a document that contains only whitespace between --- markers)
-EMPTY_DOCS=$(echo "$OUTPUT" | awk '/^---/{doc=""} {doc=doc $0} /^---/{if(doc ~ /^---[[:space:]]*$/) print "EMPTY"}' | wc -l | tr -d '[:space:]')
+EMPTY_DOCS=$(echo "$OUTPUT" | awk 'BEGIN{RS="\n---\n"} /^[[:space:]]*$/ {n++} END{print n+0}')
 assert_eq "no empty documents in helm output" "0" "$EMPTY_DOCS"
 
 # Both ApplicationSets point project to <env>-<appName>

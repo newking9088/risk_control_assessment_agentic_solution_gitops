@@ -7,11 +7,11 @@ source "$TESTS_DIR/lib.sh"
 
 # Replicate the exact parse pipeline from apply-config.sh
 parse_val() {
-  echo "$1" | cut -d':' -f2- | sed 's/[[:space:]]\{1,\}#.*//' | xargs | sed 's/^"//;s/"$//'
+  echo "$1" | cut -d':' -f2- | sed 's/[[:space:]]\{1,\}#.*//' | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//' | sed 's/^"//;s/"$//'
 }
 
 parse_key() {
-  echo "$1" | cut -d':' -f1 | xargs
+  echo "$1" | cut -d':' -f1 | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//'
 }
 
 echo "--- config.yaml parsing unit tests ---"
@@ -34,12 +34,12 @@ assert_eq "inline comment stripped from quoted value" \
 # Inline comment after unquoted value
 assert_eq "inline comment stripped from unquoted value" \
   "ubuntu-latest" \
-  "$(parse_val 'CI_RUNNER: ubuntu-latest    # default runner')"
+  "$(parse_val 'SOME_KEY: ubuntu-latest    # default runner')"
 
 # Empty quoted value
 assert_eq "empty quoted value" \
   "" \
-  "$(parse_val 'CI_REUSABLE_WORKFLOW_REF: ""')"
+  "$(parse_val 'SOME_EMPTY_KEY: ""')"
 
 # URL with multiple colons — cut -d':' -f2- must preserve the full URL
 assert_eq "URL value with multiple colons preserved" \

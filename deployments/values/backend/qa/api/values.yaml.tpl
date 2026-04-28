@@ -75,6 +75,9 @@ ingress:
   tls: []
 keyvault:
   name: ${KEYVAULT_NAME_DEV}
+dockerKeyvault:
+  name: ${DOCKER_KEYVAULT_NAME}
+  pullSecretName: ${PULL_SECRET_NAME}
 secrets:
   - ADMIN_DATABASE_URL
   - OPENAI_API_KEY

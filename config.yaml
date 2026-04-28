@@ -14,9 +14,6 @@ GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
 # --- Container registry ---
 # e.g. ghcr.io/newking9088  OR  myacr.azurecr.io/myteam
 REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"
-API_IMAGE_PATH: "api"
-AUTH_IMAGE_PATH: "auth"
-UI_IMAGE_PATH: "ui"
 PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"
 
 # --- Domain ---
@@ -46,7 +43,3 @@ ADMIN_EMAIL: "newking9088@gmail.com"
 # For in-cluster: https://kubernetes.default.svc
 CLUSTER_SERVER: "CHANGE_ME_CLUSTER_SERVER"
 
-# --- CI/CD ---
-CI_RUNNER: "ubuntu-latest"
-# Leave empty for standalone workflows; set to "org/repo/.github/workflows/deploy.yml@main" for reusable
-CI_REUSABLE_WORKFLOW_REF: ""

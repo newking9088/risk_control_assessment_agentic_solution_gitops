@@ -38,9 +38,9 @@ while IFS= read -r line; do
   # Skip lines without a colon
   [[ "$line" != *:* ]] && continue
 
-  key=$(echo "$line" | cut -d':' -f1 | xargs)
+  key=$(echo "$line" | cut -d':' -f1 | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//')
   # Strip trailing inline comment (one or more spaces + # + rest), trim, remove surrounding quotes
-  val=$(echo "$line" | cut -d':' -f2- | sed 's/[[:space:]]\{1,\}#.*//' | xargs | sed 's/^"//;s/"$//')
+  val=$(echo "$line" | cut -d':' -f2- | sed 's/[[:space:]]\{1,\}#.*//' | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//' | sed 's/^"//;s/"$//')
 
   [[ -z "$key" ]] && continue
   export "$key=$val"

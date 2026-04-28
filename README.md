@@ -62,13 +62,12 @@ DOMAIN_SUFFIX: "CHANGE_ME_DOMAIN_SUFFIX"     # e.g. apps.example.com
 KEYVAULT_NAME_DEV: "CHANGE_ME_KEYVAULT_DEV"
 KEYVAULT_NAME_PROD: "CHANGE_ME_KEYVAULT_PROD"
 DOCKER_KEYVAULT_NAME: "CHANGE_ME_DOCKER_KV"
-CLUSTER_SERVER: "CHANGE_ME_CLUSTER_SERVER"   # e.g. https://kubernetes.default.svc
 ```
 
 Values already populated (fixed by the architecture):
 - `APP_NAME`, `GITHUB_ORG`, `GITHUB_REPO`
 - `API_PORT` (8000), `AUTH_PORT` (8001), `UI_PORT` (8080)
-- `LLM_API_URL`, `ADMIN_EMAIL`, `CI_RUNNER`
+- `LLM_API_URL`, `ADMIN_EMAIL`
 
 ### Step 2 — Generate values files
 
@@ -79,6 +78,16 @@ bash scripts/apply-config.sh
 This reads `config.yaml` and produces a `values.yaml` alongside each `.tpl` file under `deployments/values/`.
 
 > **Requires:** `envsubst` — install via `brew install gettext` (Mac), `apt install gettext` (Linux), or `winget install GNU.gettext` (Windows).
+
+### Step 2.5 — Verify
+
+Run the test suite to confirm every template renders cleanly and no config keys are dead:
+
+```bash
+bash tests/run_all.sh
+```
+
+Covers: config.yaml parse logic, static repo structure, apply-config.sh end-to-end substitution, and Helm rendering. The apply-config and Helm suites auto-skip if `envsubst` or `helm` is not installed.
 
 ### Step 3 — Commit the generated files
 
@@ -111,6 +120,7 @@ For `prod`, enable **Required reviewers** to enforce a manual approval gate befo
 2. This creates/updates ArgoCD **ApplicationSets** which watch `deployments/values/<env>/` for changes.
 3. ArgoCD syncs each service (api, auth, ui) using `deployments/charts/<backend|frontend>/` + the matching `values.yaml`.
 4. Secrets are pulled from Azure Key Vault by the [AKV-to-Kubernetes operator](https://akv2k8s.io/) via `AzureKeyVaultSecret` resources.
+5. The `api` service is the sole owner of the registry pull-secret; `auth` and `ui` mount it but do not create it.
 
 ---
 
