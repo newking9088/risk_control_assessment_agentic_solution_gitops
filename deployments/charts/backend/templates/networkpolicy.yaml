@@ -1,6 +1,6 @@
 {{- if .Values.networkPolicy.enabled }}
-{{- if and (not .Values.networkPolicy.ingressNamespaceSelector) (not .Values.networkPolicy.ingressPodSelector) }}
-{{ fail "networkPolicy.enabled requires ingressNamespaceSelector or ingressPodSelector" }}
+{{- if and (eq (len .Values.networkPolicy.ingressNamespaceSelector) 0) (eq (len .Values.networkPolicy.ingressPodSelector) 0) }}
+{{ fail "networkPolicy.enabled requires ingressNamespaceSelector or ingressPodSelector to have at least one matchLabel" }}
 {{- end }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -16,11 +16,11 @@ spec:
     - Ingress
   ingress:
     - from:
-        {{- if .Values.networkPolicy.ingressNamespaceSelector }}
+        {{- if gt (len .Values.networkPolicy.ingressNamespaceSelector) 0 }}
         - namespaceSelector:
             {{- toYaml .Values.networkPolicy.ingressNamespaceSelector | nindent 12 }}
         {{- end }}
-        {{- if .Values.networkPolicy.ingressPodSelector }}
+        {{- if gt (len .Values.networkPolicy.ingressPodSelector) 0 }}
         - podSelector:
             {{- toYaml .Values.networkPolicy.ingressPodSelector | nindent 12 }}
         {{- end }}

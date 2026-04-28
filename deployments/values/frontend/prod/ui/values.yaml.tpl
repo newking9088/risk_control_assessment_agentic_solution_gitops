@@ -22,7 +22,13 @@ service:
   type: ClusterIP
   port: 80
   targetPort: "${UI_PORT}"
-resources: {}
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: "500m"
+    memory: 256Mi
 autoscaling:
   enabled: true
   minReplicas: 3
@@ -37,13 +43,17 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-credentials: 'true'
-    nginx.ingress.kubernetes.io/cors-allow-methods: "*"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-expose-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://${APP_NAME}.${DOMAIN_SUFFIX}"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
     nginx.ingress.kubernetes.io/enable-cors: 'true'
   paths:
     - path: /
       pathType: Prefix
+  # tls:
+  #   - hosts:
+  #       - "${APP_NAME}.${DOMAIN_SUFFIX}"
+  #     secretName: "${APP_NAME}-prod-tls"  # provisioned by cert-manager or pre-created
   tls: []
 env:
   VITE_API_BASE_URL: "https://${APP_NAME}.${DOMAIN_SUFFIX}"

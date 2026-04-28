@@ -21,7 +21,13 @@ service:
   type: ClusterIP
   port: 80
   targetPort: "${UI_PORT}"
-resources: {}
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: "500m"
+    memory: 256Mi
 autoscaling:
   enabled: true
   minReplicas: 2

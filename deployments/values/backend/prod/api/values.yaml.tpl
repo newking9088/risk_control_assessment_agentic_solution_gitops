@@ -59,9 +59,9 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-credentials: 'true'
-    nginx.ingress.kubernetes.io/cors-allow-methods: "*"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-expose-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://${APP_NAME}.${DOMAIN_SUFFIX}"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
@@ -71,6 +71,10 @@ ingress:
   paths:
     - path: /api/(.*)
       pathType: ImplementationSpecific
+  # tls:
+  #   - hosts:
+  #       - "${APP_NAME}.${DOMAIN_SUFFIX}"
+  #     secretName: "${APP_NAME}-prod-tls"  # provisioned by cert-manager or pre-created
   tls: []
 keyvault:
   name: ${KEYVAULT_NAME_PROD}
