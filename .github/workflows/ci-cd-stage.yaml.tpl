@@ -27,15 +27,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        # TODO: pin to SHA via 'gh api repos/actions/checkout/commits/v4'
+        # to refresh SHA: 'gh api repos/actions/checkout/commits/v4'
 
       - name: Set up Helm
         uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
-        # TODO: pin to SHA via 'gh api repos/azure/setup-helm/commits/v4'
+        # to refresh SHA: 'gh api repos/azure/setup-helm/commits/v4'
 
       - name: Set up kubeconfig
         uses: azure/k8s-set-context@efa7a6c56a5e19b4ba0827a50163baa4d678578b # v4.0.1
-        # TODO: pin to SHA via 'gh api repos/azure/k8s-set-context/commits/v4'
+        # to refresh SHA: 'gh api repos/azure/k8s-set-context/commits/v4'
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBECONFIG }}
