@@ -22,7 +22,7 @@ jobs:
         # TODO: pin to SHA via 'gh api repos/actions/checkout/commits/v4'
 
       - name: Install gettext (envsubst)
-        run: sudo apt-get update && sudo apt-get install -y gettext shellcheck
+        run: sudo apt-get update && sudo apt-get install -y gettext shellcheck python3-yaml
 
       - name: Set up Helm
         uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0

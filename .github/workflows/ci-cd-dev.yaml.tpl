@@ -27,6 +27,7 @@ jobs:
     if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: dev
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -51,11 +52,11 @@ jobs:
             deployments/appset \
             --namespace argocd \
             --create-namespace \
-            --set appName="${APP_NAME}" \
-            --set env="${ENV}" \
-            --set org="${GITHUB_ORG}" \
-            --set repo="${GITHUB_REPO}" \
-            --set server="${CLUSTER_SERVER}" \
-            --set IngressFrontendHost="${INGRESS_HOST}" \
-            --set IngressBackendHost="${INGRESS_HOST}" \
+            --set-string appName="${APP_NAME}" \
+            --set-string env="${ENV}" \
+            --set-string org="${GITHUB_ORG}" \
+            --set-string repo="${GITHUB_REPO}" \
+            --set-string server="${CLUSTER_SERVER}" \
+            --set-string IngressFrontendHost="${INGRESS_HOST}" \
+            --set-string IngressBackendHost="${INGRESS_HOST}" \
             --wait --timeout 5m

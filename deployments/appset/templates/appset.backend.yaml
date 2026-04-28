@@ -27,7 +27,7 @@ spec:
             ingress:
               domain: {{ .Values.IngressBackendHost }}
       destination:
-        namespace: {{ .Values.env }}
+        namespace: {{ .Values.env }}-{{ .Values.appName }}
         server: {{ .Values.server }}
       syncPolicy:
         automated:

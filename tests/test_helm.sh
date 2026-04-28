@@ -87,4 +87,27 @@ NS_WL_KINDS=$(echo "$OUTPUT" | grep -A50 "namespaceResourceWhitelist:" | grep -c
   && _pass "namespaceResourceWhitelist has at least 8 kind entries ($NS_WL_KINDS)" \
   || _fail "namespaceResourceWhitelist has fewer than 8 kind entries" ">=8" "$NS_WL_KINDS"
 
+# E2 / D1 regression guard: AzureKeyVaultSecret whitelisted under group spv.no
+AKV_LINE=$(echo "$OUTPUT" | grep -A1 "kind: AzureKeyVaultSecret" | grep "group:" || true)
+assert_contains \
+  "AppProject whitelists AzureKeyVaultSecret with group spv.no" \
+  "spv.no" \
+  "$AKV_LINE"
+
+# E2 / D2 regression guard: destination namespace matches <env>-<appName> everywhere
+EXPECTED_NS="${ENV}-${APP_NAME}"
+PROJECT_NS=$(echo "$OUTPUT" | awk '/^kind: AppProject/,/^---/' \
+  | grep -A5 "destinations:" | grep "namespace:" | head -1)
+assert_contains \
+  "AppProject destination namespace is ${EXPECTED_NS}" \
+  "$EXPECTED_NS" \
+  "$PROJECT_NS"
+
+APPSET_NS_COUNT=$(echo "$OUTPUT" | awk '/^kind: ApplicationSet/,/^---/' \
+  | grep -c "namespace: ${EXPECTED_NS}" || true)
+assert_eq \
+  "both ApplicationSets target namespace ${EXPECTED_NS}" \
+  "2" \
+  "$APPSET_NS_COUNT"
+
 report

@@ -18,6 +18,11 @@ if ! command -v python3 &>/dev/null; then
   exit 0
 fi
 
+if ! python3 -c "import yaml" 2>/dev/null; then
+  echo "  [SKIP] python3 yaml module not found — pip install pyyaml or apt install python3-yaml"
+  exit 0
+fi
+
 if ! command -v envsubst &>/dev/null; then
   echo "  [SKIP] envsubst not found — install gettext and re-run"
   exit 0
@@ -52,7 +57,7 @@ for chart in backend frontend; do
   if [[ $STATUS -ne 0 ]]; then echo "$OUT"; fi
 done
 
-# Per-env per-service helm template + YAML validity
+# Per-env per-service helm template + YAML validity + volumeMount assertions (E1)
 for env in dev qa stage prod; do
   for svc in api auth; do
     vals="$VALUES/backend/${env}/${svc}/values.yaml"
@@ -67,6 +72,11 @@ for env in dev qa stage prod; do
       YAML_OUT=$(echo "$OUT" | python3 -c "import yaml,sys; list(yaml.safe_load_all(sys.stdin))" 2>&1)
       YAML_STATUS=$?
       assert_eq "backend ${env}/${svc} renders valid YAML" "0" "$YAML_STATUS"
+      # E1: must include /tmp mountPath
+      assert_contains \
+        "backend ${env}/${svc}: Deployment includes mountPath /tmp" \
+        "mountPath: /tmp" \
+        "$OUT"
     fi
   done
 
@@ -82,6 +92,19 @@ for env in dev qa stage prod; do
     YAML_OUT=$(echo "$OUT" | python3 -c "import yaml,sys; list(yaml.safe_load_all(sys.stdin))" 2>&1)
     YAML_STATUS=$?
     assert_eq "frontend ${env}/ui renders valid YAML" "0" "$YAML_STATUS"
+    # E1: must include /tmp, /var/cache/nginx, /var/run mountPaths
+    assert_contains \
+      "frontend ${env}/ui: Deployment includes mountPath /tmp" \
+      "mountPath: /tmp" \
+      "$OUT"
+    assert_contains \
+      "frontend ${env}/ui: Deployment includes mountPath /var/cache/nginx" \
+      "mountPath: /var/cache/nginx" \
+      "$OUT"
+    assert_contains \
+      "frontend ${env}/ui: Deployment includes mountPath /var/run" \
+      "mountPath: /var/run" \
+      "$OUT"
   fi
 done
 

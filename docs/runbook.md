@@ -26,6 +26,8 @@ helm rollback appset-<APP_NAME>-<ENV> -n argocd
 2. The AKV-to-Kubernetes operator polls for changes. Default sync interval is configurable on the `AzureKeyVaultSecret` resource (`.spec.output.sync.interval`).
 3. To force an immediate sync, delete and recreate the Kubernetes Secret, or restart the operator pod.
 4. Roll the affected pods to pick up the new secret:
+   > Each environment's workloads live in namespace `<env>-<app-name>`
+   > (e.g. `dev-risk-control-assessment-agentic-solution`).
    ```bash
    kubectl rollout restart deployment/<release-name> -n <env>-<app-name>
    ```

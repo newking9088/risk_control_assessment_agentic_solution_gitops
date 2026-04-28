@@ -93,7 +93,8 @@ Covers: config.yaml parse logic, static repo structure, apply-config.sh end-to-e
 
 ```bash
 git add deployments/values/ deployments/appset/values.yaml .github/workflows/ci-cd-*.yaml
-# or: find . -name '*.yaml' -not -name '*.tpl' | xargs git add
+# or: find deployments/values deployments/appset .github/workflows \
+#         -name '*.yaml' ! -name '*.tpl' -print0 | xargs -0 git add
 git commit -m "chore: populate environment values from config"
 git push
 ```
@@ -174,11 +175,15 @@ Each `ci-cd-*.yaml.tpl` contains a commented-out `id-token: write` permission. W
 This repository contains **configuration only** — no runtime secrets are committed. The threat surface is:
 
 | Threat | Mitigation |
-|--------|-----------|
-| Secrets in config.yaml | `config.yaml` contains only `CHANGE_ME_*` placeholders by default; secrets live in Azure Key Vault |
-| Workflow injection | All `uses:` lines are SHA-pinned; `permissions: contents: read` by default |
-| Wildcard ArgoCD access | `AppProject` restricts `sourceRepos`, `destinations`, and allowed resource kinds |
-| Unreviewed changes to prod | Branch protection + required reviewers + GitHub Environment approval gate |
+|--------|------------|
+| Plaintext secrets in this repo | `config.yaml` only holds infra placeholders; secrets stay in Azure Key Vault and are resolved at deploy time |
+| Compromised CI runner exfiltrates `KUBECONFIG` | Migrate to OIDC workload-identity federation (see "OIDC migration path"); rotate kubeconfig on suspicion; runner `permissions: contents: read` |
+| Workflow injection via PR title/branch | All `uses:` lines SHA-pinned; `permissions: contents: read` is the workflow default |
+| Wildcard ArgoCD access | `AppProject` restricts `sourceRepos`, `destinations` (single namespace), `clusterResourceWhitelist: []`, and an explicit `namespaceResourceWhitelist` |
+| Tampered chart entry | `image.pullPolicy: Always` plus per-env prod `WARNING: pin to immutable SHA digest`; CI test asserts the warning is present |
+| Container escape via privileged process | `runAsNonRoot: true`, `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `seccompProfile: RuntimeDefault` |
+| Unreviewed prod changes | Branch protection + required reviewer + GitHub Environment manual approval gate |
+| Stale GitHub Actions vulnerability | Dependabot weekly + SHA-pinned actions |
 
 ---
 

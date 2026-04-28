@@ -26,7 +26,7 @@ spec:
       kind: ConfigMap
     - group: ""
       kind: Secret
-    - group: ""
+    - group: spv.no
       kind: AzureKeyVaultSecret
     - group: policy
       kind: PodDisruptionBudget

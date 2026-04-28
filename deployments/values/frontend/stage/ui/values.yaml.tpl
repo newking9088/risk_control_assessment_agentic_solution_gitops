@@ -27,7 +27,6 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 6
   targetCPUUtilizationPercentage: 70
-volumes: []
 nodeSelector: {}
 tolerations: []
 affinity: {}

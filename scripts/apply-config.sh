@@ -63,6 +63,22 @@ for k in "${EXPORTED_KEYS[@]}"; do
   fi
 done
 
+# Refuse to run if any value is still a CHANGE_ME placeholder
+LEFT_OVER=()
+for k in "${EXPORTED_KEYS[@]}"; do
+  v="${!k}"
+  if [[ "$v" == CHANGE_ME* ]]; then
+    LEFT_OVER+=("$k")
+  fi
+done
+if (( ${#LEFT_OVER[@]} > 0 )); then
+  echo ""
+  echo "ERROR: config.yaml still has placeholder values:"
+  for k in "${LEFT_OVER[@]}"; do echo "  - $k = ${!k}"; done
+  echo "Edit config.yaml and replace every CHANGE_ME_* before re-running."
+  exit 2
+fi
+
 echo ""
 echo "Substituting values into template files..."
 

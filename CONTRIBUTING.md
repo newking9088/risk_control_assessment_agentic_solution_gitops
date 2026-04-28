@@ -21,7 +21,7 @@ bash tests/run_all.sh
 - `bash` 4+
 - `envsubst` — `brew install gettext` (Mac), `apt install gettext` (Linux), `winget install GNU.gettext` (Windows)
 - `helm` v3 (optional — required for Helm rendering suites)
-- `python3` (optional — required for YAML validity checks in test_charts.sh)
+- `python3` + `python3-yaml` — required for `tests/test_charts.sh` YAML validity check (`apt install python3-yaml` or `pip install pyyaml`)
 - `shellcheck` (optional — required for static analysis suite)
 
 ## Contribution workflow

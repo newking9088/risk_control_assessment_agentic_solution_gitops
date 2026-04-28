@@ -109,4 +109,24 @@ for env in dev qa stage prod; do
     "$WF/ci-cd-${env}.yaml"
 done
 
+# F2: CHANGE_ME guard — script must exit 2 and print "placeholder values" when
+# a key in config.yaml still starts with CHANGE_ME
+TMPDIR_CM=$(mktemp -d)
+trap 'rm -rf "$TMPDIR_CM"' EXIT
+cp -r "$REPO_ROOT/deployments" "$TMPDIR_CM/"
+cp -r "$REPO_ROOT/.github"     "$TMPDIR_CM/"
+mkdir -p "$TMPDIR_CM/scripts"
+cp "$REPO_ROOT/scripts/apply-config.sh" "$TMPDIR_CM/scripts/"
+# Use the clean fixture but inject one CHANGE_ME value
+sed 's/^REGISTRY_URL:.*/REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"/' \
+  "$TESTS_DIR/fixtures/config.test.yaml" > "$TMPDIR_CM/config.yaml"
+
+{ bash "$TMPDIR_CM/scripts/apply-config.sh" > "$TMPDIR_CM/cm.log" 2>&1; } && CM_EXIT=0 || CM_EXIT=$?
+CM_OUT=$(cat "$TMPDIR_CM/cm.log")
+assert_eq "CHANGE_ME guard: apply-config.sh exits 2 with placeholder value" "2" "$CM_EXIT"
+assert_contains \
+  "CHANGE_ME guard: output mentions placeholder values" \
+  "placeholder values" \
+  "$CM_OUT"
+
 report

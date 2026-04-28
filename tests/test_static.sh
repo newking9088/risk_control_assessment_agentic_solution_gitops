@@ -103,6 +103,27 @@ for env in dev qa stage prod; do
     "$D/values/frontend/${env}/ui/values.yaml.tpl"
 done
 
+# E3: no per-env tpl contains bare "volumes: []" or "volumeMounts: []" (D3 regression guard)
+echo ""
+echo "--- volumes/volumeMounts override guard ---"
+for env in dev qa stage prod; do
+  for svc in api auth; do
+    tpl="$D/values/backend/${env}/${svc}/values.yaml.tpl"
+    assert_zero_grep \
+      "backend ${env}/${svc}: no bare 'volumes: []'" \
+      "^volumes: \[\]$" \
+      "$tpl"
+    assert_zero_grep \
+      "backend ${env}/${svc}: no bare 'volumeMounts: []'" \
+      "^volumeMounts: \[\]$" \
+      "$tpl"
+  done
+  assert_zero_grep \
+    "frontend ${env}/ui: no bare 'volumes: []'" \
+    "^volumes: \[\]$" \
+    "$D/values/frontend/${env}/ui/values.yaml.tpl"
+done
+
 # B8: prod tpls have the production-pinning WARNING comment
 for tpl in \
     "$D/values/backend/prod/api/values.yaml.tpl" \
