@@ -26,7 +26,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y gettext shellcheck python3-yaml
 
       - name: Set up Helm
-        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2 # v5.0.0
         # to refresh SHA: gh api repos/azure/setup-helm/git/refs/tags/v4.3.0
 
       - name: Run test suite
