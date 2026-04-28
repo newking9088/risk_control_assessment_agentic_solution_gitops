@@ -20,8 +20,21 @@ serviceAccount:
 
 podAnnotations: {}
 podLabels: {}
-podSecurityContext: {}
-securityContext: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+
+automountServiceAccountToken: false
 
 service:
   type: ClusterIP
@@ -51,13 +64,38 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
 
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: false  # opt-in — set ingressNamespaceSelector or ingressPodSelector before enabling
+  ingressNamespaceSelector: {}
+  # matchLabels:
+  #   app.kubernetes.io/name: ingress-nginx
+  ingressPodSelector: {}
+  # matchLabels:
+  #   app.kubernetes.io/name: ingress-nginx
+
 keyvault:
   name: ""
 secrets: []
 env: {}
 
-volumes: []
-volumeMounts: []
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: run
+    emptyDir: {}
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: cache
+    mountPath: /var/cache/nginx
+  - name: run
+    mountPath: /var/run
 nodeSelector: {}
 tolerations: []
 affinity: {}

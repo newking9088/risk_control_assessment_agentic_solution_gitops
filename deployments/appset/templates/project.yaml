@@ -8,10 +8,27 @@ metadata:
 spec:
   description: "RCA Platform project – {{ .Values.env }}"
   sourceRepos:
-    - '*'
+    - "https://github.com/{{ .Values.org }}/{{ .Values.repo }}"
   destinations:
-    - namespace: '*'
-      server: '*'
-  clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'
+    - namespace: "{{ .Values.env }}-{{ .Values.appName }}"
+      server: "{{ .Values.server }}"
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: AzureKeyVaultSecret
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: networking.k8s.io
+      kind: NetworkPolicy

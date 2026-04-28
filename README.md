@@ -144,3 +144,47 @@ The following secrets must exist in the Key Vault before deploying:
 - Azure Key Vault(s) provisioned with secrets above
 - Container registry accessible from the cluster
 - `helm` CLI (v3+) available in CI runner
+
+---
+
+## Branch protection
+
+Recommended settings in **GitHub → Settings → Branches → main**:
+
+- Require pull request reviews before merging (1+ approver)
+- Require status checks to pass: **`CI Tests / tests`** (the `ci-tests.yaml` workflow)
+- Require branches to be up to date before merging
+- Restrict who can push directly to `main`
+
+---
+
+## OIDC migration path
+
+Each `ci-cd-*.yaml.tpl` contains a commented-out `id-token: write` permission. When you're ready to use workload-identity federation instead of a `KUBECONFIG` secret:
+
+1. Uncomment `id-token: write` in each workflow tpl.
+2. Configure a federated credential in your cloud identity provider.
+3. Replace the `Set up kubeconfig` step with your OIDC login step.
+4. Remove the `KUBECONFIG` secret from GitHub Environments once confirmed working.
+
+---
+
+## Threat model
+
+This repository contains **configuration only** — no runtime secrets are committed. The threat surface is:
+
+| Threat | Mitigation |
+|--------|-----------|
+| Secrets in config.yaml | `config.yaml` contains only `CHANGE_ME_*` placeholders by default; secrets live in Azure Key Vault |
+| Workflow injection | All `uses:` lines are SHA-pinned; `permissions: contents: read` by default |
+| Wildcard ArgoCD access | `AppProject` restricts `sourceRepos`, `destinations`, and allowed resource kinds |
+| Unreviewed changes to prod | Branch protection + required reviewers + GitHub Environment approval gate |
+
+---
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — system diagram, component overview, data-flow
+- [Runbook](docs/runbook.md) — rollbacks, secret rotation, adding environments, ingress discovery
+- [Contributing](CONTRIBUTING.md) — dev setup, contribution workflow, commit conventions
+- [Security](SECURITY.md) — vulnerability reporting, scope, response SLA

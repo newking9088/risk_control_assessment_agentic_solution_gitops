@@ -1,0 +1,5 @@
+# Replace @your-team-handle with your GitHub team or username.
+* @newking9088
+deployments/appset/templates/project.yaml @newking9088
+.github/workflows/* @newking9088
+scripts/apply-config.sh @newking9088

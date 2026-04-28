@@ -103,6 +103,74 @@ for env in dev qa stage prod; do
     "$D/values/frontend/${env}/ui/values.yaml.tpl"
 done
 
+# B8: prod tpls have the production-pinning WARNING comment
+for tpl in \
+    "$D/values/backend/prod/api/values.yaml.tpl" \
+    "$D/values/backend/prod/auth/values.yaml.tpl" \
+    "$D/values/frontend/prod/ui/values.yaml.tpl"; do
+  svc=$(echo "$tpl" | sed "s|$D/values/||;s|/values.yaml.tpl||")
+  assert_nonzero_grep \
+    "prod ${svc}: has prod-pinning WARNING comment" \
+    "WARNING: pin to an immutable SHA digest" \
+    "$tpl"
+done
+
+# A3: KEYVAULT routing — dev/qa use DEV vault, stage/prod use PROD vault
+for env in dev qa; do
+  for svc in api auth; do
+    assert_nonzero_grep \
+      "backend ${env}/${svc}: references KEYVAULT_NAME_DEV" \
+      "KEYVAULT_NAME_DEV" \
+      "$D/values/backend/${env}/${svc}/values.yaml.tpl"
+  done
+done
+
+for env in stage prod; do
+  for svc in api auth; do
+    assert_nonzero_grep \
+      "backend ${env}/${svc}: references KEYVAULT_NAME_PROD" \
+      "KEYVAULT_NAME_PROD" \
+      "$D/values/backend/${env}/${svc}/values.yaml.tpl"
+  done
+done
+
+# A3: dockerKeyvault block present only in api tpls (4 files), absent from auth/ui
+for env in dev qa stage prod; do
+  assert_nonzero_grep \
+    "backend ${env}/api: has dockerKeyvault block" \
+    "dockerKeyvault:" \
+    "$D/values/backend/${env}/api/values.yaml.tpl"
+
+  assert_zero_grep \
+    "backend ${env}/auth: no dockerKeyvault block" \
+    "dockerKeyvault:" \
+    "$D/values/backend/${env}/auth/values.yaml.tpl"
+
+  assert_zero_grep \
+    "frontend ${env}/ui: no dockerKeyvault block" \
+    "dockerKeyvault:" \
+    "$D/values/frontend/${env}/ui/values.yaml.tpl"
+done
+
+# A3: config.test.yaml key-set equals config.yaml key-set
+echo ""
+echo "--- config.test.yaml key-set equality ---"
+extract_keys() {
+  grep -v '^[[:space:]]*#' "$1" | grep -v '^[[:space:]]*$' | grep ':' \
+    | cut -d':' -f1 | sed -E 's/^[[:space:]]+//;s/[[:space:]]+$//' | sort
+}
+PROD_KEYS=$(extract_keys "$REPO_ROOT/config.yaml")
+TEST_KEYS=$(extract_keys "$TESTS_DIR/fixtures/config.test.yaml")
+if [[ "$PROD_KEYS" == "$TEST_KEYS" ]]; then
+  _pass "config.test.yaml has identical key set to config.yaml"
+else
+  MISSING=$(comm -23 <(echo "$PROD_KEYS") <(echo "$TEST_KEYS"))
+  EXTRA=$(comm -13 <(echo "$PROD_KEYS") <(echo "$TEST_KEYS"))
+  _fail "config.test.yaml key-set mismatch" \
+    "identical" \
+    "missing=[${MISSING}] extra=[${EXTRA}]"
+fi
+
 # Dead-config-key guard: every key in config.yaml must be referenced by at least one .tpl file
 echo ""
 echo "--- Dead config key guard ---"

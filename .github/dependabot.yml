@@ -1,0 +1,19 @@
+# NOTE: Image tags in deployments/values/*/values.yaml.tpl and Chart Application
+# hooks are NOT handled here. Use a repo generator or a custom CI workflow for
+# container image tag updates.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"

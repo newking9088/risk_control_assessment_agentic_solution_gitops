@@ -69,4 +69,22 @@ assert_eq "both ApplicationSets reference project ${ENV}-${APP_NAME}" "2" "$PROJ
 REVISION_MAIN=$(echo "$OUTPUT" | grep -c "revision: main" || true)
 assert_eq "no hardcoded 'revision: main' in rendered output" "0" "$REVISION_MAIN"
 
+# B1: AppProject has no wildcard '*' in destinations or sourceRepos
+WILDCARD_COUNT=$(echo "$OUTPUT" | grep -E "^\s*(server|namespace|sourceRepos):" | grep -c "'\*'" || true)
+assert_eq "AppProject has no wildcard '*' in destinations/sourceRepos" "0" "$WILDCARD_COUNT"
+
+# B1: clusterResourceWhitelist is empty
+CLUSTER_WL=$(echo "$OUTPUT" | grep -A1 "clusterResourceWhitelist:" | grep -v "clusterResourceWhitelist:" | grep -c "\-" || true)
+assert_eq "clusterResourceWhitelist is empty (no entries)" "0" "$CLUSTER_WL"
+
+# B1: at least 8 namespaceResourceWhitelist entries each with 'group' and 'kind'
+NS_WL_GROUPS=$(echo "$OUTPUT" | grep -A50 "namespaceResourceWhitelist:" | grep -c "group:" || true)
+NS_WL_KINDS=$(echo "$OUTPUT" | grep -A50 "namespaceResourceWhitelist:" | grep -c "kind:" || true)
+[[ "$NS_WL_GROUPS" -ge 8 ]] \
+  && _pass "namespaceResourceWhitelist has at least 8 group entries ($NS_WL_GROUPS)" \
+  || _fail "namespaceResourceWhitelist has fewer than 8 group entries" ">=8" "$NS_WL_GROUPS"
+[[ "$NS_WL_KINDS" -ge 8 ]] \
+  && _pass "namespaceResourceWhitelist has at least 8 kind entries ($NS_WL_KINDS)" \
+  || _fail "namespaceResourceWhitelist has fewer than 8 kind entries" ">=8" "$NS_WL_KINDS"
+
 report

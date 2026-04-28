@@ -1,0 +1,32 @@
+name: CI Tests
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        # TODO: pin to SHA via 'gh api repos/actions/checkout/commits/v4'
+
+      - name: Install gettext (envsubst)
+        run: sudo apt-get update && sudo apt-get install -y gettext shellcheck
+
+      - name: Set up Helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 # v4.3.0
+        # TODO: pin to SHA via 'gh api repos/azure/setup-helm/commits/v4'
+
+      - name: Run test suite
+        run: bash tests/run_all.sh

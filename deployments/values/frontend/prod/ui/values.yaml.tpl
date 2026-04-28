@@ -3,6 +3,7 @@ enabled: true
 image:
   repository: ${REGISTRY_URL}/${APP_NAME}-ui
   pullPolicy: Always
+  # WARNING: pin to an immutable SHA digest or commit-SHA tag for prod deploys.
   tag: "latest"
 imagePullSecrets:
   - name: ${PULL_SECRET_NAME}
