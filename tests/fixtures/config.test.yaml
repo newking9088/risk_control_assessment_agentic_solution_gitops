@@ -1,0 +1,22 @@
+# Test configuration — real sample values (no CHANGE_ME) used by automated tests.
+# Inline comments on KEYVAULT lines are intentional: they test comment-stripping in apply-config.sh.
+APP_NAME: "my-test-app"
+GITHUB_ORG: "test-org"
+GITHUB_REPO: "test-gitops-repo"
+REGISTRY_URL: "ghcr.io/test-org"
+API_IMAGE_PATH: "api"
+AUTH_IMAGE_PATH: "auth"
+UI_IMAGE_PATH: "ui"
+PULL_SECRET_NAME: "registry-pull-secret"
+DOMAIN_SUFFIX: "apps.example.com"
+KEYVAULT_NAME_DEV: "test-kv-dev"     # used for dev + qa
+KEYVAULT_NAME_PROD: "test-kv-prod"   # used for stage + prod
+DOCKER_KEYVAULT_NAME: "test-kv-docker"
+API_PORT: "8000"
+AUTH_PORT: "8001"
+UI_PORT: "8080"
+LLM_API_URL: "https://api.openai.com"
+ADMIN_EMAIL: "admin@example.com"
+CLUSTER_SERVER: "https://kubernetes.default.svc"
+CI_RUNNER: "ubuntu-latest"
+CI_REUSABLE_WORKFLOW_REF: ""

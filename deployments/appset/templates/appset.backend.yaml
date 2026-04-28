@@ -7,7 +7,7 @@ spec:
   generators:
     - git:
         repoURL: 'https://github.com/{{ .Values.org }}/{{ .Values.repo }}.git'
-        revision: main
+        revision: HEAD
         directories:
           - path: deployments/values/backend/{{ .Values.env }}/*
   template:
