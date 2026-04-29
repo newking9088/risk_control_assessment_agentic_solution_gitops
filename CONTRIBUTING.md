@@ -3,8 +3,8 @@
 ## Development setup
 
 ```bash
-git clone https://github.com/newking9088/risk_control_assessment_agentic_solution_gitops
-cd risk_control_assessment_agentic_solution_gitops
+git clone https://github.com/<YOUR_ORG>/<YOUR_GITOPS_REPO>
+cd <YOUR_GITOPS_REPO>
 
 # 1. Fill in real values
 # Edit config.yaml and replace all CHANGE_ME_* values

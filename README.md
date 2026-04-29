@@ -2,7 +2,7 @@
 
 Declarative Kubernetes deployment configuration for the AI-Driven Risk & Control Assessment (RCA) platform. Manages three services (FastAPI backend, Better Auth, React frontend) across four environments using ArgoCD + Helm. Secrets sourced from Azure Key Vault via the AKV-to-Kubernetes operator.
 
-**App repo:** [risk_control_assessment_agentic_solution](https://github.com/newking9088/risk_control_assessment_agentic_solution)
+**App repo:** link to your application repository here (set `GITHUB_ORG` / `GITHUB_REPO` in `config.yaml`)
 
 ---
 
