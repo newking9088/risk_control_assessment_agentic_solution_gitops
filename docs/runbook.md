@@ -79,8 +79,8 @@ networkPolicy:
 
 ## Promote from stage to prod
 
-1. Verify stage is healthy: `kubectl get pods -n <APP_NAME>-stage`
+1. Verify stage is healthy: `kubectl get pods -n stage-<APP_NAME>`
 2. Confirm the same image tags are used in prod tpls (update from `latest` to a pinned SHA).
 3. Trigger the `Deploy — prod` workflow via GitHub Actions → **Actions** → **Deploy — prod** → **Run workflow**.
 4. A required reviewer must approve the deployment in the GitHub Environments page before it proceeds.
-5. Monitor rollout: `kubectl rollout status deployment/<release> -n <APP_NAME>-prod`
+5. Monitor rollout: `kubectl rollout status deployment/<release> -n prod-<APP_NAME>`

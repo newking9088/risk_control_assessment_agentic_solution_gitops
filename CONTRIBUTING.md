@@ -7,8 +7,11 @@ git clone https://github.com/newking9088/risk_control_assessment_agentic_solutio
 cd risk_control_assessment_agentic_solution_gitops
 
 # 1. Fill in real values
-cp config.yaml config.yaml.local  # optional — keep secrets out of git
 # Edit config.yaml and replace all CHANGE_ME_* values
+
+# 1.5. Verify python3 + pyyaml are available
+python3 --version
+python3 -c 'import yaml; print("pyyaml ok")'
 
 # 2. Generate values files
 bash scripts/apply-config.sh
@@ -20,8 +23,8 @@ bash tests/run_all.sh
 **Requirements:**
 - `bash` 4+
 - `envsubst` — `brew install gettext` (Mac), `apt install gettext` (Linux), `winget install GNU.gettext` (Windows)
+- `python3` + `pyyaml` — required for `tests/test_charts.sh` YAML validity check (`apt install python3-yaml` or `pip install pyyaml`)
 - `helm` v3 (optional — required for Helm rendering suites)
-- `python3` + `python3-yaml` — required for `tests/test_charts.sh` YAML validity check (`apt install python3-yaml` or `pip install pyyaml`)
 - `shellcheck` (optional — required for static analysis suite)
 
 ## Contribution workflow
