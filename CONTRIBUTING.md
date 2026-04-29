@@ -62,10 +62,3 @@ Generated files:
 - `deployments/appset/values.yaml`
 - `.github/workflows/ci-cd-*.yaml`
 
-## Internal prompts
-
-The `docs/notes/` directory contains the AI-assisted audit prompts used to harden this repo. They are kept as an audit trail so future maintainers can understand the reasoning behind non-obvious decisions:
-
-- [GITOPS_HARDEN_PROMPT.md](docs/notes/GITOPS_HARDEN_PROMPT.md) — Sections A/B/C: security hardening
-- [GITOPS_CORRECTNESS_PROMPT.md](docs/notes/GITOPS_CORRECTNESS_PROMPT.md) — Sections D/E/F/G: correctness bugs
-- [GITOPS_REFINE_PROMPT.md](docs/notes/GITOPS_REFINE_PROMPT.md) — final refinement audit (A–G)
