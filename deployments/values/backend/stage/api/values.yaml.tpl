@@ -88,4 +88,4 @@ env:
   DB_POOL_MAX: "20"
   OPENAI_API_URL: "${LLM_API_URL}"
   CORS_ALLOWED_ORIGINS: "https://${APP_NAME}-stage.${DOMAIN_SUFFIX}"
-  AUTH_SERVICE_URL: "http://${APP_NAME}-stage-auth-backend.stage.svc.cluster.local"
+  AUTH_SERVICE_URL: "http://${APP_NAME}-stage-auth-backend.stage-${APP_NAME}.svc.cluster.local"

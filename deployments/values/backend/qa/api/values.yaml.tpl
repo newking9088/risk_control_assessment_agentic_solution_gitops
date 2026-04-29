@@ -88,4 +88,4 @@ env:
   DB_POOL_MAX: "10"
   OPENAI_API_URL: "${LLM_API_URL}"
   CORS_ALLOWED_ORIGINS: "https://${APP_NAME}-qa.${DOMAIN_SUFFIX}"
-  AUTH_SERVICE_URL: "http://${APP_NAME}-qa-auth-backend.qa.svc.cluster.local"
+  AUTH_SERVICE_URL: "http://${APP_NAME}-qa-auth-backend.qa-${APP_NAME}.svc.cluster.local"

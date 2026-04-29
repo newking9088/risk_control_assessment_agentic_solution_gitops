@@ -209,4 +209,30 @@ while IFS= read -r line; do
     || _fail "config key ${key} is dead — not referenced by any .tpl" ">=1 match" "0"
 done < "$REPO_ROOT/config.yaml"
 
+# B: Auth-service FQDN must reference namespace <env>-${APP_NAME}, not just <env>
+echo ""
+echo "--- AUTH_SERVICE_URL namespace formula guard ---"
+for env in dev qa stage prod; do
+  tpl="$D/values/backend/${env}/api/values.yaml.tpl"
+  expected="auth-backend.${env}-\${APP_NAME}.svc.cluster.local"
+  count=$(grep -c "$expected" "$tpl" 2>/dev/null || true)
+  [[ "${count:-0}" -gt 0 ]] \
+    && _pass "${env}/api: AUTH_SERVICE_URL uses namespace ${env}-\${APP_NAME}" \
+    || _fail "${env}/api: AUTH_SERVICE_URL has wrong namespace" \
+      "host suffix '$expected'" \
+      "not found in $tpl"
+done
+
+# Inverse guard: must not contain the buggy short-namespace form
+for env in dev qa stage prod; do
+  tpl="$D/values/backend/${env}/api/values.yaml.tpl"
+  bad="auth-backend.${env}.svc.cluster.local"
+  count=$(grep -c "$bad" "$tpl" 2>/dev/null || true)
+  [[ "${count:-0}" -eq 0 ]] \
+    && _pass "${env}/api: no buggy short-namespace AUTH_SERVICE_URL" \
+    || _fail "${env}/api: buggy short-namespace form still present" \
+      "0 matches for '$bad'" \
+      "${count}"
+done
+
 report

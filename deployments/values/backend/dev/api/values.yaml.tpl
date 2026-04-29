@@ -88,4 +88,4 @@ env:
   DB_POOL_MAX: "10"
   OPENAI_API_URL: "${LLM_API_URL}"
   CORS_ALLOWED_ORIGINS: "https://${APP_NAME}-dev.${DOMAIN_SUFFIX}"
-  AUTH_SERVICE_URL: "http://${APP_NAME}-dev-auth-backend.dev.svc.cluster.local"
+  AUTH_SERVICE_URL: "http://${APP_NAME}-dev-auth-backend.dev-${APP_NAME}.svc.cluster.local"
