@@ -53,21 +53,28 @@ deployments/
 
 ### Step 1 — Fill in `config.yaml`
 
-Open `config.yaml` and replace every `CHANGE_ME_*` value:
+Open `config.yaml` and replace **every** `CHANGE_ME_*` value:
 
 ```yaml
-REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"       # e.g. ghcr.io/newking9088 or myacr.azurecr.io/myteam
+# App identity — must match your fork
+APP_NAME: "CHANGE_ME_APP_NAME"          # slug used in namespace/domain names
+GITHUB_ORG: "CHANGE_ME_GITHUB_ORG"     # GitHub org or username owning this repo
+GITHUB_REPO: "CHANGE_ME_GITHUB_REPO"   # name of this GitOps repository
+ADMIN_EMAIL: "CHANGE_ME_ADMIN_EMAIL"   # seeded into the database as superuser
+
+# Infrastructure
+REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"       # e.g. ghcr.io/my-org or myacr.azurecr.io/myteam
 PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"
 DOMAIN_SUFFIX: "CHANGE_ME_DOMAIN_SUFFIX"     # e.g. apps.example.com
 KEYVAULT_NAME_DEV: "CHANGE_ME_KEYVAULT_DEV"
 KEYVAULT_NAME_PROD: "CHANGE_ME_KEYVAULT_PROD"
 DOCKER_KEYVAULT_NAME: "CHANGE_ME_DOCKER_KV"
+CLUSTER_SERVER: "CHANGE_ME_CLUSTER_SERVER"   # ArgoCD destination server URL
 ```
 
-Values already populated (fixed by the architecture):
-- `APP_NAME`, `GITHUB_ORG`, `GITHUB_REPO`
+Values that do **not** need changing (fixed by the service architecture):
 - `API_PORT` (8000), `AUTH_PORT` (8001), `UI_PORT` (8080)
-- `LLM_API_URL`, `ADMIN_EMAIL`
+- `LLM_API_URL`
 
 ### Step 2 — Generate values files
 
@@ -145,6 +152,7 @@ The following secrets must exist in the Key Vault before deploying:
 - Azure Key Vault(s) provisioned with secrets above
 - Container registry accessible from the cluster
 - `helm` CLI (v3+) available in CI runner
+- `python3` + `pyyaml` — required for the test suite (`pip install pyyaml` or `apt install python3-yaml`)
 
 ---
 

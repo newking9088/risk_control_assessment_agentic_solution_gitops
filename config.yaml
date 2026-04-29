@@ -1,27 +1,29 @@
 # =============================================================================
 # RCA Platform — GitOps Configuration
 # =============================================================================
-# Fill in all CHANGE_ME values before running scripts/apply-config.sh
-# Values already populated are fixed for this project.
+# Fill in ALL CHANGE_ME values before running scripts/apply-config.sh.
 # Secrets remain in Azure Key Vault; nothing is read from .env
 # =============================================================================
 
-# --- App identity (fixed) ---
-APP_NAME: "risk-control-assessment-agentic-solution"
-GITHUB_ORG: "newking9088"
-GITHUB_REPO: "risk_control_assessment_agentic_solution_gitops"
+# --- App identity ---
+# Your app's slug — used in namespace names, release names, and domain prefixes
+APP_NAME: "CHANGE_ME_APP_NAME"
+# GitHub organisation or username that owns this GitOps repo
+GITHUB_ORG: "CHANGE_ME_GITHUB_ORG"
+# Name of this GitOps repository (used by ArgoCD ApplicationSets)
+GITHUB_REPO: "CHANGE_ME_GITHUB_REPO"
 
 # --- Container registry ---
-# e.g. ghcr.io/newking9088  OR  myacr.azurecr.io/myteam
+# e.g. ghcr.io/my-org  OR  myacr.azurecr.io/myteam
 REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"
 PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"
 
 # --- Domain ---
 # Resulting domains:
-#   dev:   risk-control-assessment-agentic-solution-dev.DOMAIN_SUFFIX
-#   qa:    risk-control-assessment-agentic-solution-qa.DOMAIN_SUFFIX
-#   stage: risk-control-assessment-agentic-solution-stage.DOMAIN_SUFFIX
-#   prod:  risk-control-assessment-agentic-solution.DOMAIN_SUFFIX
+#   dev:   <APP_NAME>-dev.<DOMAIN_SUFFIX>
+#   qa:    <APP_NAME>-qa.<DOMAIN_SUFFIX>
+#   stage: <APP_NAME>-stage.<DOMAIN_SUFFIX>
+#   prod:  <APP_NAME>.<DOMAIN_SUFFIX>
 DOMAIN_SUFFIX: "CHANGE_ME_DOMAIN_SUFFIX"
 
 # --- Azure Key Vault names ---
@@ -34,12 +36,12 @@ API_PORT: "8000"
 AUTH_PORT: "8001"
 UI_PORT: "8080"
 
-# --- LLM & auth config (fixed) ---
+# --- LLM & auth config ---
 LLM_API_URL: "https://api.openai.com"
-ADMIN_EMAIL: "newking9088@gmail.com"
+# Admin / superuser e-mail seeded into the database
+ADMIN_EMAIL: "CHANGE_ME_ADMIN_EMAIL"
 
 # --- Kubernetes / ArgoCD ---
 # For AKS: https://<aks-api-server-fqdn>
 # For in-cluster: https://kubernetes.default.svc
 CLUSTER_SERVER: "CHANGE_ME_CLUSTER_SERVER"
-
