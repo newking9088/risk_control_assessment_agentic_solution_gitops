@@ -105,6 +105,14 @@ for env in dev qa stage prod; do
       "frontend ${env}/ui: Deployment includes mountPath /var/run" \
       "mountPath: /var/run" \
       "$OUT"
+    assert_contains \
+      "frontend ${env}/ui: Deployment includes livenessProbe" \
+      "livenessProbe:" \
+      "$OUT"
+    assert_contains \
+      "frontend ${env}/ui: Deployment includes readinessProbe" \
+      "readinessProbe:" \
+      "$OUT"
   fi
 done
 
