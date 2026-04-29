@@ -9,7 +9,6 @@ imagePullSecrets:
 nameOverride: ""
 fullnameOverride: ""
 serviceAccount:
-  create: false
   automount: false
   annotations: {}
   name: ""
@@ -36,9 +35,9 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-credentials: 'true'
-    nginx.ingress.kubernetes.io/cors-allow-methods: "*"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-    nginx.ingress.kubernetes.io/cors-expose-headers: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://${APP_NAME}-qa.${DOMAIN_SUFFIX}"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
     nginx.ingress.kubernetes.io/enable-cors: 'true'
   paths:
     - path: /

@@ -10,8 +10,6 @@ imagePullSecrets:
 nameOverride: ""
 fullnameOverride: ""
 serviceAccount:
-  create: false
-  automount: true
   annotations: {}
   name: ""
 podAnnotations: {}

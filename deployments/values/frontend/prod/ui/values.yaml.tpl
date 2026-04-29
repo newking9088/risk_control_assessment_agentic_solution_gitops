@@ -10,7 +10,6 @@ imagePullSecrets:
 nameOverride: ""
 fullnameOverride: ""
 serviceAccount:
-  create: false
   automount: false
   annotations: {}
   name: ""

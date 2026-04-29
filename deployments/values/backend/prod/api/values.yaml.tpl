@@ -10,8 +10,6 @@ imagePullSecrets:
 nameOverride: ""
 fullnameOverride: ""
 serviceAccount:
-  create: false
-  automount: true
   annotations: {}
   name: ""
 podAnnotations: {}
@@ -67,9 +65,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   paths:
-    - path: /api/(.*)
+    - path: /api/(?!auth/)(.*)
       pathType: ImplementationSpecific
   # tls:
   #   - hosts:
