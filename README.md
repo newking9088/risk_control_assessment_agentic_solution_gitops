@@ -49,6 +49,22 @@ deployments/
 
 ---
 
+## Cluster prerequisites
+
+Before activating, ensure your Kubernetes cluster has:
+
+1. **ArgoCD** — see [official install docs](https://argo-cd.readthedocs.io/en/stable/getting_started/)
+2. **AKV-to-Kubernetes operator** — see [akv2k8s.io install docs](https://akv2k8s.io/installation/)
+3. **NGINX Ingress Controller** — or update `ingress.className` in each values tpl to match your controller
+
+Quick reference (in-cluster ArgoCD install):
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+---
+
 ## Activating with real values
 
 ### Step 1 — Fill in `config.yaml`
@@ -119,6 +135,13 @@ For each, set:
 | Variable | `CLUSTER_SERVER` | ArgoCD destination server URL |
 
 For `prod`, enable **Required reviewers** to enforce a manual approval gate before deployment.
+
+> **TIP — base64-encoding your kubeconfig:**
+> ```bash
+> cat ~/.kube/config | base64 | pbcopy   # macOS — copies to clipboard
+> cat ~/.kube/config | base64 -w 0       # Linux — prints one line
+> ```
+> Paste the output as the value of the `KUBECONFIG` secret.
 
 ---
 

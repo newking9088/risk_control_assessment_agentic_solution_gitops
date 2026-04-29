@@ -20,6 +20,10 @@ It does **not** contain runtime secrets. All secrets (database URLs, API keys, a
 
 ## Reporting a Vulnerability
 
+> **Maintainers:** enable private vulnerability reporting under
+> Settings → Code security → Private vulnerability reporting before
+> publishing this template.
+
 Please **do not open a public GitHub issue** for security vulnerabilities.
 
 Use GitHub's private vulnerability reporting:
