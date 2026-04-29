@@ -88,7 +88,7 @@ NS_WL_KINDS=$(echo "$OUTPUT" | grep -A50 "namespaceResourceWhitelist:" | grep -c
   || _fail "namespaceResourceWhitelist has fewer than 8 kind entries" ">=8" "$NS_WL_KINDS"
 
 # E2 / D1 regression guard: AzureKeyVaultSecret whitelisted under group spv.no
-AKV_LINE=$(echo "$OUTPUT" | grep -A1 "kind: AzureKeyVaultSecret" | grep "group:" || true)
+AKV_LINE=$(echo "$OUTPUT" | grep -B1 "kind: AzureKeyVaultSecret" | grep "group:" || true)
 assert_contains \
   "AppProject whitelists AzureKeyVaultSecret with group spv.no" \
   "spv.no" \
