@@ -1,0 +1,22 @@
+name: Deploy — stage
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-stage
+  cancel-in-progress: false
+
+jobs:
+  deploy-stage:
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      env: stage
+      app-name: ${{ vars.APP_NAME }}
+      org: ${{ vars.GITHUB_ORG }}
+      repo: ${{ vars.GITHUB_REPO }}
+      cluster-server: ${{ vars.CLUSTER_SERVER_STAGE }}
+      backend-host: ${{ vars.BACKEND_HOST_STAGE }}
+      frontend-host: ${{ vars.FRONTEND_HOST_STAGE }}
+    secrets:
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64_STAGE }}

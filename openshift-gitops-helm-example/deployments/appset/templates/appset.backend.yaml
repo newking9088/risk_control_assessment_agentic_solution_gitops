@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ .Values.appName }}-backend-{{ .Values.env }}
+  namespace: {{ .Values.argocdNamespace }}
+spec:
+  generators:
+    - git:
+        repoURL: 'https://github.com/{{ .Values.org }}/{{ .Values.repo }}.git'
+        revision: HEAD
+        directories:
+          - path: deployments/values/backend/{{ .Values.env }}/*
+  template:
+    metadata:
+      name: '{{ .Values.appName }}-{{ .Values.env }}-{{`{{path.basenameNormalized}}`}}'
+      namespace: {{ .Values.argocdNamespace }}
+    spec:
+      project: {{ .Values.appName }}-{{ .Values.org }}-{{ .Values.env }}
+      source:
+        repoURL: 'https://github.com/{{ .Values.org }}/{{ .Values.repo }}.git'
+        targetRevision: HEAD
+        path: charts/backend
+        helm:
+          valueFiles:
+            - '../../deployments/values/backend/{{ .Values.env }}/{{`{{path.basenameNormalized}}`}}/values.yaml'
+      destination:
+        server: {{ .Values.server }}
+        namespace: '{{`{{path.basenameNormalized}}`}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+      ignoreDifferences:
+        - group: autoscaling
+          kind: HorizontalPodAutoscaler
+          jsonPointers:
+            - /spec/metrics

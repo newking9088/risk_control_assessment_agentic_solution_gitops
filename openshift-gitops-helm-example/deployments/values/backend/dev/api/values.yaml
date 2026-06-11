@@ -1,0 +1,19 @@
+image:
+  tag: "1.0.0"
+
+env:
+  LOG_LEVEL: DEBUG
+  APP_ENV: dev
+
+autoscaling:
+  enabled: false
+
+# secretStore:
+#   name: aws-secrets-manager
+#   remotePrefix: myapp/dev/
+
+# secrets: []
+# - MY_SECRET_KEY
+
+# oauth2Proxy:
+#   enabled: false

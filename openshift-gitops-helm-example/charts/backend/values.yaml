@@ -1,0 +1,102 @@
+replicaCount: 1
+
+image:
+  repository: <your-registry>/<namespace>/backend-api
+  pullPolicy: Always
+  tag: "1.0.0"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+route:
+  enabled: true
+  path: /
+  domain: ""    # e.g. my-app-dev.apps.<cluster-domain>
+  tls:
+    termination: edge
+
+oauth2Proxy:
+  enabled: false
+  port: 4180
+  provider: oidc
+  image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+  oidcIssuerUrl: ""
+  extraArgs: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+artifactoryToken:
+  enabled: false
+
+# secretStore:
+#   name: aws-secrets-manager
+#   remotePrefix: myapp/dev/
+
+secrets: []
+# - MY_SECRET_KEY
+
+env: {}
+# LOG_LEVEL: INFO
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 45
+  periodSeconds: 30
+  failureThreshold: 3
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 6
+  timeoutSeconds: 3
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: [ALL]
+
+serviceAccount:
+  create: true
+  automount: false
+  annotations: {}
+  name: ""
+
+nameOverride: ""
+fullnameOverride: ""
+
+volumes:
+  - name: tmp
+    emptyDir: {}
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,32 @@
+image:
+  tag: "1.0.0"
+
+replicaCount: 3
+
+env:
+  LOG_LEVEL: WARNING
+  APP_ENV: prod
+
+route:
+  enabled: true
+  domain: "<your-app>.apps.<cluster-domain>"
+  path: /
+  tls:
+    termination: edge
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+secretStore:
+  name: aws-secrets-manager
+  remotePrefix: myapp/prod/
+
+secrets:
+  - MY_SECRET_KEY
+
+oauth2Proxy:
+  enabled: true
+  oidcIssuerUrl: "https://login.microsoftonline.com/CHANGE_ME_ENTRA_TENANT_ID/v2.0"

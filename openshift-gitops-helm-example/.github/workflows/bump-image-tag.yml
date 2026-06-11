@@ -1,0 +1,65 @@
+name: Bump image tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Chart tier
+        required: true
+        type: choice
+        options:
+          - backend
+          - frontend
+      service:
+        description: Service name (e.g. api, ui)
+        required: true
+        type: string
+      env:
+        description: Target environment
+        required: true
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      image-tag:
+        description: New image tag
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Update image.tag in values file
+        run: |
+          FILE="deployments/values/${{ inputs.tier }}/${{ inputs.env }}/${{ inputs.service }}/values.yaml"
+          if [ ! -f "$FILE" ]; then
+            echo "Values file not found: $FILE" && exit 1
+          fi
+          sed -i "s|^  tag:.*|  tag: \"${{ inputs.image-tag }}\"|" "$FILE"
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(${{ inputs.tier }}/${{ inputs.env }}/${{ inputs.service }}): bump image tag to ${{ inputs.image-tag }}"
+          branch: "bump/${{ inputs.tier }}-${{ inputs.env }}-${{ inputs.service }}-${{ inputs.image-tag }}"
+          title: "chore(${{ inputs.tier }}/${{ inputs.env }}/${{ inputs.service }}): bump image tag to ${{ inputs.image-tag }}"
+          body: |
+            Automated image tag bump.
+
+            | Field | Value |
+            |---|---|
+            | Tier | `${{ inputs.tier }}` |
+            | Service | `${{ inputs.service }}` |
+            | Environment | `${{ inputs.env }}` |
+            | New tag | `${{ inputs.image-tag }}` |
+          base: main

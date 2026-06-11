@@ -1,0 +1,9 @@
+Get the application Route:
+
+  oc get route {{ include "backend.fullname" . }} -n {{ .Release.Namespace }}
+
+The HOST/PORT column shows your public URL.
+{{- if .Values.oauth2Proxy.enabled }}
+
+Authentication is enabled via oauth2-proxy (Entra ID OIDC).
+{{- end }}

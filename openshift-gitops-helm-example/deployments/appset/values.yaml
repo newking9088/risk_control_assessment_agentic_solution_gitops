@@ -1,0 +1,12 @@
+env: "dev"
+org: "<github-org>"
+repo: "<gitops-repo>"
+server: "https://kubernetes.default.svc"
+appName: ""
+argocdNamespace: "openshift-gitops"
+entra:
+  tenantId: "CHANGE_ME_ENTRA_TENANT_ID"
+  authorityHost: "login.microsoftonline.com"  # use login.microsoftonline.us for GovCloud
+# IngressBackendHost and IngressFrontendHost are passed via --set at install time
+IngressBackendHost: ""
+IngressFrontendHost: ""

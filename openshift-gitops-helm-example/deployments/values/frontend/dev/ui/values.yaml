@@ -1,0 +1,16 @@
+image:
+  tag: "1.0.0"
+
+env:
+  VITE_API_BASE_URL: "https://<your-app>-dev.apps.<cluster-domain>"
+  APP_ENV: dev
+
+autoscaling:
+  enabled: false
+
+# secretStore:
+#   name: aws-secrets-manager
+#   remotePrefix: myapp/dev/
+
+# oauth2Proxy:
+#   enabled: false

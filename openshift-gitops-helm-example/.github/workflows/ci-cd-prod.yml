@@ -1,0 +1,22 @@
+name: Deploy — prod
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy-prod:
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      env: prod
+      app-name: ${{ vars.APP_NAME }}
+      org: ${{ vars.GITHUB_ORG }}
+      repo: ${{ vars.GITHUB_REPO }}
+      cluster-server: ${{ vars.CLUSTER_SERVER_PROD }}
+      backend-host: ${{ vars.BACKEND_HOST_PROD }}
+      frontend-host: ${{ vars.FRONTEND_HOST_PROD }}
+    secrets:
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64_PROD }}

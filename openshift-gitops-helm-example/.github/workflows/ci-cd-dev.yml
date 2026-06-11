@@ -1,0 +1,24 @@
+name: Deploy — dev
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy-dev:
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      env: dev
+      app-name: ${{ vars.APP_NAME }}
+      org: ${{ vars.GITHUB_ORG }}
+      repo: ${{ vars.GITHUB_REPO }}
+      cluster-server: ${{ vars.CLUSTER_SERVER_DEV }}
+      backend-host: ${{ vars.BACKEND_HOST_DEV }}
+      frontend-host: ${{ vars.FRONTEND_HOST_DEV }}
+    secrets:
+      KUBECONFIG_B64: ${{ secrets.KUBECONFIG_B64_DEV }}
