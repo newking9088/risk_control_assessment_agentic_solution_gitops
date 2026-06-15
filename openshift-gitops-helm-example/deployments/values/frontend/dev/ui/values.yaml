@@ -1,4 +1,8 @@
 image:
+  # Nexus path for this env's frontend image. See charts/frontend/values.yaml for the
+  # port- vs path-based Nexus URL forms; the host must match the pull secret's
+  # docker-server exactly.
+  repository: <nexus-host>/<nexus-repo>/frontend-ui
   tag: "1.0.0"
 
 env:

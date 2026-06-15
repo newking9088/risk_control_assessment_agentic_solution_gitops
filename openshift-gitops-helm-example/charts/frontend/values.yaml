@@ -1,9 +1,28 @@
 replicaCount: 1
 
 image:
-  repository: <your-registry>/<namespace>/frontend-ui
+  # Frontend image in the private Nexus container registry.
+  # Nexus exposes Docker repositories in one of two URL forms — use whichever your
+  # instance is configured for:
+  #   port-based:  nexus.host:8443/<image>                      (one port per repo)
+  #   path-based:  nexus.host/repository/docker-hosted/<image>  (one host, path per repo)
+  # This repository host AND the pull secret's docker-server (see registryPullSecret)
+  # must match EXACTLY, or image pulls fail with auth/not-found errors.
+  repository: <nexus-host>/<nexus-repo>/frontend-ui
   pullPolicy: Always
   tag: "1.0.0"
+
+# Pull secret for the private Nexus registry.
+# Each service runs in its OWN namespace (the frontend lands in `ui`, the backend in
+# `api`), so the frontend provisions its own pull Secret rather than sharing one. When
+# `enabled` AND a `secretStore` is configured, templates/externalsecret-docker.yaml
+# materialises a kubernetes.io/dockerconfigjson Secret (named `secretName`) in this
+# namespace from Nexus credentials, and the Deployment mounts it via imagePullSecrets.
+# Leave disabled for public/anonymous images.
+registryPullSecret:
+  enabled: false
+  # Name of the rendered pull Secret in this (the frontend's) namespace.
+  secretName: nexus-registry-secret
 
 service:
   type: ClusterIP

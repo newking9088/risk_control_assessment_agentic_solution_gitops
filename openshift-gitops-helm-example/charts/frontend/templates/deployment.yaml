@@ -18,6 +18,12 @@ spec:
     spec:
       serviceAccountName: {{ include "frontend.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      {{- if .Values.registryPullSecret.enabled }}
+      # Mounts the Nexus pull Secret created by templates/externalsecret-docker.yaml
+      # in this namespace.
+      imagePullSecrets:
+        - name: {{ .Values.registryPullSecret.secretName }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

@@ -1,7 +1,14 @@
 replicaCount: 1
 
 image:
-  repository: <your-registry>/<namespace>/backend-api
+  # Backend image in the private Nexus container registry.
+  # Nexus exposes Docker repositories in one of two URL forms — use whichever your
+  # instance is configured for:
+  #   port-based:  nexus.host:8443/<image>                      (one port per repo)
+  #   path-based:  nexus.host/repository/docker-hosted/<image>  (one host, path per repo)
+  # This repository host AND the pull secret's docker-server (see registryPullSecret)
+  # must match EXACTLY, or image pulls fail with auth/not-found errors.
+  repository: <nexus-host>/<nexus-repo>/backend-api
   pullPolicy: Always
   tag: "1.0.0"
 
@@ -31,8 +38,16 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
 
-artifactoryToken:
+# Pull secret for the private Nexus registry.
+# When `enabled` AND a `secretStore` is configured, templates/externalsecret-docker.yaml
+# materialises a kubernetes.io/dockerconfigjson Secret (named `secretName`) from Nexus
+# credentials held in the external secret store, and this Deployment mounts it via
+# imagePullSecrets. Leave disabled for public/anonymous images.
+registryPullSecret:
   enabled: false
+  # Name of the rendered pull Secret in this (the backend's) namespace. The frontend
+  # chart provisions its own pull Secret the same way in its own namespace.
+  secretName: nexus-registry-secret
 
 # secretStore:
 #   name: aws-secrets-manager
