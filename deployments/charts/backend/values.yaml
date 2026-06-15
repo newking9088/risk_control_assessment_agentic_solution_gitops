@@ -3,6 +3,9 @@ replicaCount: 1
 enabled: false
 
 image:
+  # Backend image in the private Nexus Docker registry. CHANGE_ME_REGISTRY_URL is
+  # substituted from config.yaml REGISTRY_URL — use the Nexus URL form your instance
+  # serves (port-based nexus.host:8443 or path-based nexus.host/repository/docker-hosted).
   repository: "CHANGE_ME_REGISTRY_URL/api"
   pullPolicy: Always
   tag: "latest"

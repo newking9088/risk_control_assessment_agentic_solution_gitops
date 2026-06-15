@@ -79,8 +79,8 @@ GITHUB_REPO: "CHANGE_ME_GITHUB_REPO"   # name of this GitOps repository
 ADMIN_EMAIL: "CHANGE_ME_ADMIN_EMAIL"   # seeded into the database as superuser
 
 # Infrastructure
-REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"       # e.g. ghcr.io/my-org or myacr.azurecr.io/myteam
-PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"
+REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"       # Nexus Docker registry — port-based nexus.host:8443 or path-based nexus.host/repository/docker-hosted
+PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"  # dockerconfigjson secret holding Nexus credentials
 DOMAIN_SUFFIX: "CHANGE_ME_DOMAIN_SUFFIX"     # e.g. apps.example.com
 KEYVAULT_NAME_DEV: "CHANGE_ME_KEYVAULT_DEV"
 KEYVAULT_NAME_PROD: "CHANGE_ME_KEYVAULT_PROD"

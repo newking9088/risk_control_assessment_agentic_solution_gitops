@@ -13,9 +13,15 @@ GITHUB_ORG: "CHANGE_ME_GITHUB_ORG"
 # Name of this GitOps repository (used by ArgoCD ApplicationSets)
 GITHUB_REPO: "CHANGE_ME_GITHUB_REPO"
 
-# --- Container registry ---
-# e.g. ghcr.io/my-org  OR  myacr.azurecr.io/myteam
+# --- Container registry (Sonatype Nexus) ---
+# Images are pulled from the private Nexus Docker registry. Use the URL form your
+# Nexus instance is configured for — keep it identical here, in image.repository, and
+# in the pull secret's docker-server:
+#   port-based:  nexus.example.com:8443
+#   path-based:  nexus.example.com/repository/docker-hosted
 REGISTRY_URL: "CHANGE_ME_REGISTRY_URL"
+# Name of the dockerconfigjson pull secret holding Nexus credentials (provisioned via
+# the AzureKeyVaultSecret in deployments/charts/backend/templates/akvdocker.yaml).
 PULL_SECRET_NAME: "CHANGE_ME_PULL_SECRET_NAME"
 
 # --- Domain ---

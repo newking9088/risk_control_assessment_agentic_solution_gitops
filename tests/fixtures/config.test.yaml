@@ -3,7 +3,7 @@
 APP_NAME: "my-test-app"
 GITHUB_ORG: "test-org"
 GITHUB_REPO: "test-gitops-repo"
-REGISTRY_URL: "ghcr.io/test-org"
+REGISTRY_URL: "nexus.test.example.com:8443"
 PULL_SECRET_NAME: "registry-pull-secret"
 DOMAIN_SUFFIX: "apps.example.com"
 KEYVAULT_NAME_DEV: "test-kv-dev"     # used for dev + qa
