@@ -1,2 +1,6 @@
 .DS_Store
 .env
+
+# Instruction screenshots dropped into the folder — not part of the template
+*.jpg
+*.jpeg

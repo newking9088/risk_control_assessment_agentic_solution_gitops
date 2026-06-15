@@ -1,0 +1,21 @@
+# ── Step 1: install the Red Hat OpenShift GitOps operator (cluster-wide) ──────────
+# Applies to the built-in `openshift-operators` namespace, which already ships a global
+# OperatorGroup — so no extra Namespace/OperatorGroup object is required here.
+# Installing this operator automatically creates a ready-to-use Argo CD instance named
+# `openshift-gitops` in the `openshift-gitops` namespace.
+#
+#   oc apply -f bootstrap/01-gitops-operator-subscription.yaml
+#
+# Requires cluster-admin. Docs: Red Hat OpenShift GitOps → Installing GitOps.
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  # `latest` tracks the newest GA; pin to a channel like `gitops-1.13` for reproducibility.
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace

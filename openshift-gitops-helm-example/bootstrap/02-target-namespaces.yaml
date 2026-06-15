@@ -1,0 +1,27 @@
+# ── Step 2: create the target namespaces and let Argo CD manage them ──────────────
+# The git generator turns each `deployments/values/<tier>/<env>/*` directory into one
+# Application deployed into a namespace named after the directory (here `api` and `ui`).
+#
+# THE GOTCHA: the default `openshift-gitops` Argo CD instance may only deploy into a
+# namespace that carries the label `argocd.argoproj.io/managed-by: openshift-gitops`.
+# The OpenShift GitOps operator watches for this label and provisions the Role/RoleBinding
+# that grant Argo CD access. Pre-creating the namespaces WITH the label is the
+# deterministic way to grant that permission (Applications also set CreateNamespace=true,
+# but pre-labelling avoids the first-sync "namespace is not permitted" race).
+#
+#   oc apply -f bootstrap/02-target-namespaces.yaml
+#
+# Add one block per service directory you deploy (e.g. a `worker` dir → a `worker` ns).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: api
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ui
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops

@@ -69,8 +69,16 @@ deployments/
   ci-cd-dev.yml           Installs/updates the dev appset on push to main
   ci-cd-stage.yml         Manual deploy to stage
   ci-cd-prod.yml          Manual deploy to prod
+  set-existing-repo.yml   One-time: seed an app repo with Nexus credentials
 examples/
   app-repo-build-and-push.yml   Reference CI workflow for your APPLICATION source repos
+bootstrap/
+  01-gitops-operator-subscription.yaml   Install the OpenShift GitOps operator
+  02-target-namespaces.yaml              Create + label the api/ui namespaces for Argo CD
+  03-argocd-repo-secret.yaml             Register this repo with Argo CD (private repos)
+docs/
+  PROVISIONING.md               Cluster bootstrap: operator → Argo CD → Helm (start here)
+  SETUP.md                      App config: GitHub vars/secrets, per-env values, Nexus
 tests/
   test-openshift-compat.sh      OpenShift compatibility test suite (see Testing)
 ```
@@ -78,6 +86,13 @@ tests/
 ---
 
 ## Taking this template into use
+
+> **New here? Follow the two guides in `docs/`:**
+> [`docs/PROVISIONING.md`](docs/PROVISIONING.md) does the cluster bootstrap (install the
+> OpenShift GitOps operator, wire Argo CD to GitHub, deploy the Helm charts) with
+> copy-paste manifests in [`bootstrap/`](bootstrap); [`docs/SETUP.md`](docs/SETUP.md)
+> covers the app config (GitHub Actions vars/secrets, per-env values, Nexus credentials).
+> The section below is the condensed version.
 
 ### 0. Prerequisites
 
@@ -100,8 +115,10 @@ Search for `<` placeholders and `CHANGE_ME`:
 
 | File | Setting | Set to |
 |---|---|---|
-| `charts/backend/values.yaml` | `image.repository` | your backend image, e.g. `quay.io/acme/backend-api` |
-| `charts/frontend/values.yaml` | `image.repository` | your frontend image |
+| `charts/backend/values.yaml` | `image.repository` | your backend image in Nexus, e.g. `nexus.example.com:8443/backend-api` |
+| `charts/frontend/values.yaml` | `image.repository` | your frontend image in Nexus |
+| `charts/backend/values.yaml` | `registryPullSecret` | set `enabled: true` to provision the Nexus pull secret via ESO |
+| `charts/frontend/values.yaml` | `registryPullSecret` | set `enabled: true` to provision the Nexus pull secret via ESO |
 | `deployments/appset/values.yaml` | `org`, `repo` | GitHub org and the name of *this* gitops repo |
 | `deployments/appset/values.yaml` | `appName` | short app name — prefixes every resource |
 
@@ -247,6 +264,7 @@ from the `<fullname>-oauth2-proxy` secret (rendered by
 | `ci-cd-stage.yml` / `ci-cd-prod.yml` | manual | Same for stage/prod — manual gate by design |
 | `_deploy.yml` | called by the above | Checkout → setup helm → write kubeconfig → `helm upgrade --install` the appset |
 | `bump-image-tag.yml` | manual | Rewrites `image.tag` in one values file, opens a PR |
+| `set-existing-repo.yml` | manual | One-time: copies this repo's Nexus credentials (`REGISTRY_USERNAME`, `REGISTRY_PASSWORD`, `NPMRC`) into a target app repo |
 
 Note these workflows only install the **appset chart** (the Argo CD wiring).
 Application rollout is Argo CD's job, driven purely by what is merged to `main`.
@@ -264,6 +282,96 @@ bash tests/test-openshift-compat.sh
 
 The test suite verifies, among other things, that rendered manifests are
 compatible with OpenShift's **restricted-v2 SCC** — see next section.
+
+## Nexus on OpenShift
+
+These charts pull application images from a private **Sonatype Nexus** Docker registry
+(the client standard — not JFrog Artifactory). Building/pushing those images uses
+**podman/buildah**, never the docker CLI (see `examples/app-repo-build-and-push.yml`).
+Three prerequisites have to line up — none are manifests in this repo:
+
+1. **The cluster must trust the Nexus internal CA.** If Nexus is served with a private
+   CA, OpenShift cannot pull from it until that CA is added cluster-wide. The cluster
+   team adds the CA bundle as a ConfigMap in the `openshift-config` namespace and
+   references it from the cluster image config:
+
+   ```yaml
+   # ConfigMap (openshift-config namespace) holding the Nexus CA bundle
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: nexus-registry-ca
+     namespace: openshift-config
+   data:
+     # key = the Nexus registry host[:port], exactly as it appears in image.repository
+     "nexus.example.com:8443": |
+       -----BEGIN CERTIFICATE-----
+       ...
+       -----END CERTIFICATE-----
+   ---
+   # Patch the cluster-wide image config to trust it (cluster-admin task)
+   apiVersion: config.openshift.io/v1
+   kind: Image
+   metadata:
+     name: cluster
+   spec:
+     additionalTrustedCA:
+       name: nexus-registry-ca
+   ```
+
+2. **Confirm the Nexus Docker URL format.** Nexus publishes Docker repositories either
+   *port-based* (`nexus.example.com:8443/<image>`, a connector per repo) or *path-based*
+   (`nexus.example.com/repository/docker-hosted/<image>`, one host, path per repo). Pick
+   the one your instance uses and keep it identical in three places: `image.repository`
+   in the chart/env values, the `docker-server` inside the pull secret's
+   `.dockerconfigjson`, and the CA ConfigMap key above. A mismatch (e.g. port-based image
+   tag vs path-based secret) fails the pull even when credentials are correct.
+
+3. **The build runner must trust the Nexus CA too.** `podman login`/`podman push` in the
+   app-repo workflow only succeed if the runner trusts the same CA. On a self-hosted
+   runner inside the Nexus network, install the CA into the host trust store
+   (`/etc/pki/ca-trust/source/anchors/` + `update-ca-trust` on RHEL). Prefer a
+   self-hosted runner so it can reach the internal Nexus host at all.
+
+The pull secret itself is delivered through the External Secrets Operator. Because each
+service is deployed into its **own namespace** (`api` for the backend, `ui` for the
+frontend), each chart provisions its **own** pull secret in that namespace — a Secret in
+`api` is not visible to pods in `ui`. So enable `registryPullSecret` in **both**
+`charts/backend/values.yaml` and `charts/frontend/values.yaml` (with a `secretStore`
+configured for that env). ESO then materialises the `.dockerconfigjson` (containing the
+Nexus credentials) as the `nexus-registry-secret` Secret in each namespace, and each
+Deployment mounts its own automatically. This requires an ESO `SecretStore` to exist in
+both namespaces.
+
+### One-time: seed an app repo with Nexus credentials (`set-existing-repo.yml`)
+
+Each application repo that builds images (via `examples/app-repo-build-and-push.yml`)
+needs three Nexus secrets — `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`, and `NPMRC`
+(an `.npmrc` pointing at the **Nexus npm registry**, used for private `npm install`).
+Rather than pasting them into every repo by hand, the `set-existing-repo.yml` workflow
+copies them from *this* repo into a target repo. Run it **once per app repo** (re-run to
+rotate values):
+
+1. **On this GitOps repo** (Settings → Secrets and variables → Actions), set once:
+   - Secrets: `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`, `NPMRC`, and `REPO_ADMIN_PAT`
+     (a PAT allowed to write secrets on the target repo — classic `repo` scope, or a
+     fine-grained token with *Secrets: Read/Write* + *Administration* on the target).
+   - Variable (optional): `REGISTRY` — the Nexus Docker host (port- or path-based).
+
+   `NPMRC` must target Nexus, not the public registry, e.g.:
+
+   ```ini
+   registry=https://nexus.example.com/repository/npm-group/
+   //nexus.example.com/repository/npm-group/:_authToken=<nexus-npm-token>
+   ```
+
+2. **Run the workflow:** Actions → *Set up existing app repo (Nexus credentials)* → *Run
+   workflow*, and enter the target repo as `owner/name` (e.g. `acme/payments-api`).
+
+3. The workflow uses the GitHub CLI to write `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`,
+   and `NPMRC` (plus the optional `REGISTRY` variable) onto the target repo. Its
+   `app-repo-build-and-push.yml` can then `podman login`/`podman push` to Nexus and
+   install private npm packages with no manual secret entry.
 
 ## OpenShift specifics
 
