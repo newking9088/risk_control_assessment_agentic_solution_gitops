@@ -1,0 +1,80 @@
+# One-time bootstrap: configure an EXISTING application repository with the Nexus
+# credentials it needs to (a) build & push images with podman and (b) install
+# private npm packages from Nexus.
+#
+# Run this ONCE per application repo from the Actions tab (re-run any time to
+# rotate the values). It copies the Nexus credentials held in THIS repo's Actions
+# secrets into the TARGET app repo's Actions secrets, so the reference workflow
+# examples/app-repo-build-and-push.yml in that repo can `podman login`/`podman push`
+# and `npm install` without anyone pasting credentials by hand.
+#
+# Self-contained — no private/external reusable workflows. It uses the GitHub CLI
+# (`gh`, preinstalled on ubuntu-latest) plus a PAT with admin rights on the target.
+#
+# ── Prerequisites: set these ONCE on THIS repo ───────────────────────────────────
+#   Settings → Secrets and variables → Actions
+#   Secrets:
+#     REGISTRY_USERNAME  Nexus service-account username (push + pull rights)
+#     REGISTRY_PASSWORD  Nexus service-account password or token
+#     NPMRC              Full .npmrc contents pointing at the Nexus npm registry —
+#                        NOT a public registry. Example:
+#                          registry=https://nexus.example.com/repository/npm-group/
+#                          //nexus.example.com/repository/npm-group/:_authToken=<nexus-npm-token>
+#     REPO_ADMIN_PAT     PAT able to write secrets on the target repo
+#                        (classic: `repo` scope; fine-grained: Secrets = Read/Write
+#                         and Administration on the target repository).
+#   Variable (optional):
+#     REGISTRY           Nexus Docker host, port- or path-based (e.g. nexus.example.com:8443).
+#                        Mirrors the env.REGISTRY in app-repo-build-and-push.yml.
+# ─────────────────────────────────────────────────────────────────────────────────
+
+name: Set up existing app repo (Nexus credentials)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-repo:
+        description: App repo to configure, as owner/name (e.g. acme/payments-api)
+        required: true
+        type: string
+
+# This workflow authenticates with REPO_ADMIN_PAT, not the job's GITHUB_TOKEN,
+# because it writes secrets into a DIFFERENT repository.
+permissions: {}
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push Nexus credentials into the target repo
+        env:
+          GH_TOKEN: ${{ secrets.REPO_ADMIN_PAT }}
+          TARGET: ${{ inputs.target-repo }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          NPMRC: ${{ secrets.NPMRC }}
+          REGISTRY: ${{ vars.REGISTRY }}
+        run: |
+          set -euo pipefail
+
+          # Fail early (and clearly) if a required source secret is missing here.
+          : "${GH_TOKEN:?set REPO_ADMIN_PAT on this repo}"
+          : "${REGISTRY_USERNAME:?set REGISTRY_USERNAME on this repo}"
+          : "${REGISTRY_PASSWORD:?set REGISTRY_PASSWORD on this repo}"
+          : "${NPMRC:?set NPMRC on this repo (must point at the Nexus npm registry)}"
+
+          # Registry login/push credentials consumed by app-repo-build-and-push.yml.
+          # `gh secret set` reads the value from stdin when --body is omitted, so the
+          # secret never appears in the process argument list.
+          printf '%s' "$REGISTRY_USERNAME" | gh secret set REGISTRY_USERNAME --repo "$TARGET"
+          printf '%s' "$REGISTRY_PASSWORD" | gh secret set REGISTRY_PASSWORD --repo "$TARGET"
+
+          # .npmrc for private npm installs against the Nexus npm-hosted/-group repo.
+          printf '%s' "$NPMRC" | gh secret set NPMRC --repo "$TARGET"
+
+          # Optional: expose the Nexus Docker host to the target repo as a variable.
+          if [ -n "${REGISTRY:-}" ]; then
+            gh variable set REGISTRY --repo "$TARGET" --body "$REGISTRY"
+          fi
+
+          echo "Configured $TARGET with Nexus REGISTRY_USERNAME / REGISTRY_PASSWORD / NPMRC."

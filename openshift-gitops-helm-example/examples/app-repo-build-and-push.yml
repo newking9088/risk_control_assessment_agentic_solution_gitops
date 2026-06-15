@@ -14,11 +14,20 @@ on:
         type: string
 
 env:
-  REGISTRY: <your-registry>
-  IMAGE_NAME: <your-namespace>/<your-service>
+  # Private Nexus registry host. Use the form your Nexus Docker repo is configured for:
+  #   port-based:  nexus.host:8443        path-based:  nexus.host/repository/docker-hosted
+  # This MUST match image.repository in the GitOps chart values and the pull secret's
+  # docker-server, otherwise the cluster cannot pull what this job pushes.
+  REGISTRY: <nexus-host>
+  IMAGE_NAME: <nexus-repo>/<your-service>
 
 jobs:
   build-and-push:
+    # Build/push uses podman + buildah (the client standardises on podman, not docker).
+    # podman/buildah are preinstalled on GitHub-hosted ubuntu-latest. Prefer a
+    # SELF-HOSTED runner inside the Nexus network so it can reach the internal Nexus
+    # host and trust its CA — see the "Nexus on OpenShift" notes in the GitOps repo
+    # README for the CA-trust requirement that `podman login`/`podman push` depend on.
     runs-on: ubuntu-latest
     outputs:
       image-tag: ${{ steps.tag.outputs.value }}
@@ -35,17 +44,21 @@ jobs:
           fi
           echo "value=${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Log in to registry
+      - name: Log in to Nexus registry
         run: |
+          # podman login (not docker login). Credentials come from repo secrets and
+          # must be a Nexus account allowed to push to the target Docker repo.
           echo "${{ secrets.REGISTRY_PASSWORD }}" \
-            | docker login "${{ env.REGISTRY }}" \
+            | podman login "${{ env.REGISTRY }}" \
               -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
 
       - name: Build and push
         run: |
+          # A standard Dockerfile is fine — only the CLI changes (podman/buildah, no
+          # docker CLI). `.` is the build context; -f names the Dockerfile explicitly.
           IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}"
-          docker build -t "$IMAGE" .
-          docker push "$IMAGE"
+          podman build -f Dockerfile -t "$IMAGE" .
+          podman push "$IMAGE"
 
   bump-gitops-tag:
     needs: build-and-push
